@@ -171,14 +171,14 @@ public abstract class NeuronalNetwork {
             System.out.println("Learning set: " + i);
             learnWithTestData(trainingData[i], expectedResult[i]);
         }
-        //learningAlgorithm.setNewWeightsAndBiases();
+        learningAlgorithm.updateWeightsAndBias();
     }
 
     void learnWithTrainingData(double[][] trainingData, double[][] expectedResult) {
         for(int i = 0; i < trainingData.length; i++) {
             System.out.println("Learning set: " + i);
             learnWithTestData(trainingData[i], expectedResult[i]);
-            //learningAlgorithm.setNewWeightsAndBiases();
+            learningAlgorithm.updateWeightsAndBias();
         }
     }
 }

@@ -13,18 +13,25 @@ public class Backpropagation extends LearningAlgorithm{
     private int totalWeights = 0;
     private int totalBiases = 0;
 
+    private double[] weightChanges;
+    private double[] biasChanges;
+
+    private int learningSteps;
+
     @Override
     public void initLearningAlgorithm(InputLayer inputLayer, HiddenLayer[] hiddenLayers, OutputLayer outputLayer, CostFunction costFunction, double learningRate) {
         super.initLearningAlgorithm(inputLayer, hiddenLayers, outputLayer, costFunction, learningRate);
 
         countAllWeightsAndBiases();
+
+        weightChanges = new double[totalWeights];
+        biasChanges = new double[totalBiases];
+
+        learningSteps = 0;
     }
 
     @Override
     public void learn(double[] results, double[] expectedResults) {
-        double[] weightChanges = new double[totalWeights];
-        double[] biasChanges = new double[totalBiases];
-
         int posInWeights = 0;
         int posInBias = 0;
 
@@ -36,14 +43,14 @@ public class Backpropagation extends LearningAlgorithm{
             n.setSensitivity(sensitivity);
 
             double calculatedBias = ac.derivativeActivationFunction(n.getRawActivation()) * sensitivity;
-            biasChanges[posInBias] = calculatedBias;
+            biasChanges[posInBias] += calculatedBias;
             posInBias++;
 
             for(int y = 0; y < n.getInputWeights().length; y++) {
                 Neuron hn = hiddenLayers[hiddenLayers.length-1].getNeurons()[i];
 
                 double calculatedWeight = hn.getActivation() * calculatedBias;
-                weightChanges[i] = calculatedWeight;
+                weightChanges[i] += calculatedWeight;
                 posInWeights++;
             }
         }
@@ -72,7 +79,7 @@ public class Backpropagation extends LearningAlgorithm{
                 n.setSensitivity(sensitivity);
 
                 double calculatedBias = ac.derivativeActivationFunction(n.getRawActivation()) * sensitivity;
-                biasChanges[posInBias] = calculatedBias;
+                biasChanges[posInBias] += calculatedBias;
                 posInBias++;
 
                 Layer nextLayer;
@@ -83,26 +90,30 @@ public class Backpropagation extends LearningAlgorithm{
                     Neuron nn = nextLayer.getNeurons()[z];
 
                     double calculatedWeight = nn.getActivation() * calculatedBias;
-                    weightChanges[posInWeights] = calculatedWeight;
+                    weightChanges[posInWeights] += calculatedWeight;
                     posInWeights++;
                 }
             }
         }
+        learningSteps++;
+    }
 
-        posInWeights = 0;
-        posInBias = 0;
+    @Override
+    public void updateWeightsAndBias() {
+        int posInWeights = 0;
+        int posInBias = 0;
 
         for(int i = 0; i < outputLayer.getNumberOfNeuronsInLayer(); i++) {
             Neuron n = outputLayer.getNeurons()[i];
 
-            double newBias = n.getBias() - (learningRate * biasChanges[posInBias]);
+            double newBias = n.getBias() - (learningRate * (biasChanges[posInBias]/learningSteps));
             posInBias++;
 
             double[] newWeights = new double[n.getInputWeights().length];
             for(int y = 0; y < n.getInputWeights().length; y++) {
                 double oldWeight = n.getInputWeights()[y];
 
-                double newWeight = oldWeight - (learningRate * weightChanges[posInWeights]);
+                double newWeight = oldWeight - (learningRate * (weightChanges[posInWeights]/learningSteps));
                 posInWeights++;
 
                 newWeights[y] = newWeight;
@@ -118,14 +129,14 @@ public class Backpropagation extends LearningAlgorithm{
             for(int y = 0; y < h.getNumberOfNeuronsInLayer(); y++) {
                 Neuron n = h.getNeurons()[y];
 
-                double newBias = n.getBias() - (learningRate * biasChanges[posInBias]);
+                double newBias = n.getBias() - (learningRate * (biasChanges[posInBias]/learningSteps));
                 posInBias++;
 
                 double[] newWeights = new double[n.getInputWeights().length];
                 for(int z = 0; z < n.getInputWeights().length; z++) {
                     double oldWeight = n.getInputWeights()[z];
 
-                    double newWeight = oldWeight - (learningRate * weightChanges[posInWeights]);
+                    double newWeight = oldWeight - (learningRate * (weightChanges[posInWeights]/learningSteps));
                     posInWeights++;
 
                     newWeights[z] = newWeight;
@@ -135,6 +146,11 @@ public class Backpropagation extends LearningAlgorithm{
                 n.setBias(newBias);
             }
         }
+
+        weightChanges = new double[totalWeights];
+        biasChanges = new double[totalBiases];
+
+        learningSteps = 0;
     }
 
     // This function computes the number of total weights and biases

@@ -11,7 +11,7 @@ public class MyNeuronalNetwork extends NeuronalNetwork {
     Random r;
 
     public MyNeuronalNetwork() {
-        initNeuronalNetwork(2, 2, new int[]{3,2}, 1, new SquareCost(), new Backpropagation(), 1);
+        initNeuronalNetwork(2, 2, new int[]{2, 2}, 1, new SquareCost(), new Backpropagation(), 1);
 
         r = new Random();
 
@@ -21,7 +21,7 @@ public class MyNeuronalNetwork extends NeuronalNetwork {
 
         sc.next();
 
-        double[][][] learnSet = getTrainingData(10000);
+        double[][][] learnSet = getTrainingData(100000);
 
         learnWithTrainingData(learnSet[0], learnSet[1]);
 

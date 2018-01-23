@@ -28,4 +28,6 @@ public abstract class LearningAlgorithm {
     }
 
     public abstract void learn(double[] results, double[] expectedResults);
+
+    public abstract void updateWeightsAndBias();
 }
